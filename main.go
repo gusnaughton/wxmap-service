@@ -66,6 +66,7 @@ func main() {
 	apiRouter := router.Group("/")
 	{
 		apiRouter.GET("/wx/:iata", GetAirportWx)
+		apiRouter.GET("/wxUpdate", UpdateWxData)
 	}
 	addr := fmt.Sprintf(":%s", port)
 
