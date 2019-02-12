@@ -13,16 +13,8 @@ import (
 
 var db *gorm.DB
 
-
-type Airport struct {
-	gorm.Model
-	Code string
-	Name string
-	Location string
-}
-
 type Fields struct {
-	AirportInfo []Airport`json:"airports"`
+	AirportInfo []Airport `json:"airports"`
 }
 
 func importAirports()Fields {
@@ -47,6 +39,7 @@ func init() {
 	}
 
 	db.AutoMigrate(&Airport{})
+	db.AutoMigrate(&Weather{})
 	var airportItem Airport
 	db.Last(&airportItem, 1)
 	if airportItem.ID == 0 {
@@ -58,6 +51,8 @@ func init() {
 
 }
 
+
+
 func main() {
 	port := os.Getenv("WXPORT")
 
@@ -68,9 +63,10 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Logger())
-	/*apiRouter := router.Group("/") {
+	apiRouter := router.Group("/")
+	{
 		apiRouter.GET("/wx/:iata", GetAirportWx)
-	}*/
+	}
 	addr := fmt.Sprintf(":%s", port)
 
 	router.Run(addr)
