@@ -15,24 +15,26 @@ import (
 )
 
 type METAR struct {
-	gorm.Model
-	Airport     Airport `gorm:"foreignkey:AirportId"`
-	AirportId   uint
-	Timestamp   int64
-	Ceiling     int
-	Visibility  int
-	Wind        int
-	Temperature int
-	Sky         int
+	gorm.Model `json:"-"`
+	Airport     Airport `gorm:"foreignkey:AirportId" json:"-"`
+	AirportId   uint `json:"-"`
+	Timestamp   int64 `json:"-"`
+	Ceiling     int `json:"C"`
+	Visibility  int `json:"V"`
+	Wind        int `json:"W"`
+	Temperature int `json:"T"`
+	Sky         int `json:"S"`
 }
 
 func GetAirportWx(c *gin.Context) {
 	var wx []METAR
+	//var res []miniMETAR
 	iata := c.Param("iata")
 
 	airport := GetAirport(iata)
 
 	db.Limit(10).Where("airport_id = ?", airport.ID).Find(&wx)
+
 	c.JSON(http.StatusOK, wx)
 }
 
@@ -150,10 +152,6 @@ func SkyParser(sky string) int {
 		return Purple
 	}
 
-}
-
-func addRowToDB(metar *METAR) {
-	db.Create(&metar)
 }
 
 func UpdateWxData(c *gin.Context) {
