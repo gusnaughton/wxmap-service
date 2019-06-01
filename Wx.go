@@ -32,7 +32,7 @@ func GetAirportWx(c *gin.Context) {
 
 	airport := GetAirport(iata)
 
-	db.Where("airport_id = ?", airport.ID).Find(&wx)
+	db.Limit(10).Where("airport_id = ?", airport.ID).Find(&wx)
 	c.JSON(http.StatusOK, wx)
 }
 
