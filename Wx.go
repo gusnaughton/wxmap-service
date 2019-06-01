@@ -38,46 +38,37 @@ func GetAirportWx(c *gin.Context) {
 
 func scraper(id int, jobs <-chan []string, results chan *METAR) {
 	for row := range jobs {
-		fmt.Println("Starting job: " + row[1])
 		// IATA code
 		airport := GetAirport(row[1])
-		// Observation Time
-		fmt.Println(row[2])
-		timestamp, err := time.Parse(time.RFC3339Nano, row[2])
-		if err != nil {
-			log.Fatal(err)
-		}
+		if airport.ID != 0 {
+			// Observation Time
+			fmt.Println(row[2])
+			timestamp, err := time.Parse(time.RFC3339Nano, row[2])
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		// Ceiling 24
-		ceiling, _ := strconv.ParseInt(row[24], 0, 64)
-		// Visibility 10
-		visibility, _ := strconv.ParseInt(row[10], 0, 64)
-		// Wind 8
-		wind, _ := strconv.ParseInt(row[8], 0, 64)
-		// Temperature 5
-		temperature, _ := strconv.ParseInt(row[5], 0, 64)
+			// Ceiling 24
+			ceiling, _ := strconv.ParseInt(row[24], 0, 64)
+			// Visibility 10
+			visibility, _ := strconv.ParseInt(row[10], 0, 64)
+			// Wind 8
+			wind, _ := strconv.ParseInt(row[8], 0, 64)
+			// Temperature 5
+			temperature, _ := strconv.ParseInt(row[5], 0, 64)
 
-		fmt.Println("Ending job:" + row[1])
-		db.Create(&METAR{
-			Airport:     airport,
-			AirportId:   airport.ID,
-			Timestamp:   timestamp.Unix(),
-			Ceiling:     CeilingParser(ceiling),
-			Visibility:  VisibilityParser(visibility),
-			Wind:        WindParser(wind),
-			Temperature: TemperatureParser(temperature),
-			Sky:         SkyParser(row[30]),
-		})
+			db.Create(&METAR{
+				Airport:     airport,
+				AirportId:   airport.ID,
+				Timestamp:   timestamp.Unix(),
+				Ceiling:     CeilingParser(ceiling),
+				Visibility:  VisibilityParser(visibility),
+				Wind:        WindParser(wind),
+				Temperature: TemperatureParser(temperature),
+				Sky:         SkyParser(row[30]),
+			})
 
-		results <- &METAR{
-			Airport:     airport,
-			AirportId:   airport.ID,
-			Timestamp:   timestamp.Unix(),
-			Ceiling:     CeilingParser(ceiling),
-			Visibility:  VisibilityParser(visibility),
-			Wind:        WindParser(wind),
-			Temperature: TemperatureParser(temperature),
-			Sky:         SkyParser(row[30]),
+
 		}
 	}
 }
@@ -201,7 +192,6 @@ func UpdateWxData(c *gin.Context) {
 			log.Fatal(err)
 		}
 		jobs <- row
-		fmt.Println("Added new row")
 	}
 	close(jobs)
 

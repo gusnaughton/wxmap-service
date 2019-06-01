@@ -18,10 +18,9 @@ func GetAirport(iata string)Airport {
 	code := strings.ToUpper(iata)
 
 	fmt.Println(code[0])
-	code = code[1:]
-
-	fmt.Println("GetAirport" + code)
-	db.Where("code = ?", code).First(&airport)
-	fmt.Println("Airport" + code + " ID: " + string(airport.ID))
+	if code[0] == 'K' {
+		code = code[1:]
+		db.Where("code = ?", code).First(&airport)
+	}
 	return airport
 }
