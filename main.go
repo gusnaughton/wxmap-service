@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -39,7 +40,7 @@ func init() {
 	}
 
 	db.AutoMigrate(&Airport{})
-	db.AutoMigrate(&Weather{})
+	db.AutoMigrate(&METAR{})
 	var airportItem Airport
 	db.Last(&airportItem, 1)
 	if airportItem.ID == 0 {
@@ -63,6 +64,7 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Logger())
+	pprof.Register(router)
 	apiRouter := router.Group("/")
 	{
 		apiRouter.GET("/wx/:iata", GetAirportWx)

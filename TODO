@@ -1,0 +1,12 @@
+# Steps to production
+- Get board attributed to server, LED mappings in DB based on MAC address
+
+
+Ceiling (100s of feet)
+P < 5 <= R < 10 <= B < 30 <= G
+Visibility (mi)
+P < 1 <= R < 3 <= B < 5 <= G
+Wind Speed (kts)
+P > 30 >= R > 20 >= B > 10 >= G
+Temperature (C/F)
+B <= 0/32 < G < 30/86 <= R
