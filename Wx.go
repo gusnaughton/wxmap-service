@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -26,7 +27,7 @@ type METAR struct {
 	Sky         int `json:"S"`
 }
 
-type miniMETAR struct {
+type tinyMETAR struct {
 	C []int
 	V []int
 	W []int
@@ -34,23 +35,43 @@ type miniMETAR struct {
 	S []int
 }
 
+type miniMETAR struct {
+	C [][]int
+	V [][]int
+	W [][]int
+	T [][]int
+	S [][]int
+}
+
 func GetAirportWx(c *gin.Context) {
 	var wx []METAR
-	res := miniMETAR{}
+	var codes []string
+	final := miniMETAR{}
 
 	iata := c.Param("iata")
-	airport := GetAirport(iata)
-	db.Limit(10).Where("airport_id = ?", airport.ID).Find(&wx)
-	fmt.Println(&wx[0])
-	for _, metar := range wx {
-		res.C = append(res.C, metar.Ceiling)
-		res.V = append(res.V, metar.Visibility)
-		res.W = append(res.W, metar.Wind)
-		res.T = append(res.T, metar.Temperature)
-		res.S = append(res.S, metar.Sky)
+	codes = strings.Split(iata, ",")
+
+	for _, code := range codes {
+		airport := GetAirport(code)
+		db.Limit(10).Where("airport_id = ?", airport.ID).Find(&wx)
+
+		res := tinyMETAR{}
+		for _, metar := range wx {
+			res.C = append(res.C, metar.Ceiling)
+			res.V = append(res.V, metar.Visibility)
+			res.W = append(res.W, metar.Wind)
+			res.T = append(res.T, metar.Temperature)
+			res.S = append(res.S, metar.Sky)
+		}
+		final.C = append(final.C, res.C)
+		final.V = append(final.V, res.V)
+		final.W = append(final.W, res.W)
+		final.T = append(final.T, res.T)
+		final.S = append(final.S, res.S)
 	}
 
-	c.JSON(http.StatusOK, res)
+
+	c.JSON(http.StatusOK, final)
 }
 
 func scraper(id int, jobs <-chan []string, results chan *METAR) {
