@@ -26,16 +26,31 @@ type METAR struct {
 	Sky         int `json:"S"`
 }
 
+type miniMETAR struct {
+	C []int
+	V []int
+	W []int
+	T []int
+	S []int
+}
+
 func GetAirportWx(c *gin.Context) {
 	var wx []METAR
-	//var res []miniMETAR
+	res := miniMETAR{}
+
 	iata := c.Param("iata")
-
 	airport := GetAirport(iata)
-
 	db.Limit(10).Where("airport_id = ?", airport.ID).Find(&wx)
+	fmt.Println(&wx[0])
+	for _, metar := range wx {
+		res.C = append(res.C, metar.Ceiling)
+		res.V = append(res.V, metar.Visibility)
+		res.W = append(res.W, metar.Wind)
+		res.T = append(res.T, metar.Temperature)
+		res.S = append(res.S, metar.Sky)
+	}
 
-	c.JSON(http.StatusOK, wx)
+	c.JSON(http.StatusOK, res)
 }
 
 func scraper(id int, jobs <-chan []string, results chan *METAR) {
